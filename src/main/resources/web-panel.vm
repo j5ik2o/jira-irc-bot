@@ -1,2 +1,2 @@
-<a href="${baseurl}/plugins/servlet/irc-bot/project?projectId=$project.id">$i18n.getText("ircbot.project.label")</a>
+<a href="${baseurl}/plugins/servlet/jira-irc-bot/project?projectId=$project.id">$i18n.getText("ircbot.project.label")</a>
 

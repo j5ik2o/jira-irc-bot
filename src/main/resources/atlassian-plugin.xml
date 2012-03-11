@@ -33,16 +33,16 @@
 	</component>
 
 
-	<rest key="rest" path="/irc-bot" version="1.0">
+	<rest key="rest" path="/jira-irc-bot" version="1.0">
 		<description>Provides REST resources for the admin UI.</description>
 	</rest>
 
 	<servlet key="admin-servlet" class="com.github.j5ik2o.AdminServlet">
-		<url-pattern>/irc-bot/admin</url-pattern>
+		<url-pattern>/jira-irc-bot/admin</url-pattern>
 	</servlet>
 
 	<servlet key="project-servlet" class="com.github.j5ik2o.ProjectServlet">
-		<url-pattern>/irc-bot/project</url-pattern>
+		<url-pattern>/jira-irc-bot/project</url-pattern>
 	</servlet>
 
 	<language name="Japanese (Japan)" key="ja_JP" language="ja"
@@ -55,7 +55,7 @@
 		section="system.admin/globalsettings" weight="10" application="jira">
 		<description>Link to ircbot-admin page.</description>
 		<label key="ircbot.admin.label" />
-		<link linkId="ircbot-admin-link">/plugins/servlet/irc-bot/admin</link>
+		<link linkId="ircbot-admin-link">/plugins/servlet/jira-irc-bot/admin</link>
 	</web-item>
 
 	<web-panel key="myPanel" location="webpanels.admin.summary.right-panels">

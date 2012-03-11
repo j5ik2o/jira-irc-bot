@@ -11,6 +11,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.atlassian.sal.api.pluginsettings.PluginSettings;
 import com.atlassian.sal.api.pluginsettings.PluginSettingsFactory;
 import com.atlassian.sal.api.transaction.TransactionCallback;
@@ -22,7 +25,9 @@ public class IrcBotGlobalConfigResource {
 	private final UserManager userManager;
 	private final PluginSettingsFactory pluginSettingsFactory;
 	private final TransactionTemplate transactionTemplate;
-
+	private static final Logger LOGGER = LoggerFactory
+			.getLogger(IrcBotGlobalConfigResource.class);
+	
 	public IrcBotGlobalConfigResource(UserManager userManager,
 			PluginSettingsFactory pluginSettingsFactory,
 			TransactionTemplate transactionTemplate) {

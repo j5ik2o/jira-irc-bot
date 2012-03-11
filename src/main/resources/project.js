@@ -3,7 +3,7 @@ AJS.toInit(function() {
     var projectId = AJS.$("#projectId").attr("value");
     function populateForm() {
     	AJS.$.ajax({
-            url: baseUrl + "/rest/irc-bot/1.0/globalConfig",
+            url: baseUrl + "/rest/jira-irc-bot/1.0/globalConfig",
             dataType: "json",
             success: function(config) {
             	if (config.enable){
@@ -20,7 +20,7 @@ AJS.toInit(function() {
             }
         });
         AJS.$.ajax({
-            url: baseUrl + "/rest/irc-bot/1.0/channelConfig/" + projectId,
+            url: baseUrl + "/rest/jira-irc-bot/1.0/channelConfig/" + projectId,
             dataType: "json",
             success: function(config) {   
                 if (config.enable){
@@ -35,7 +35,7 @@ AJS.toInit(function() {
     
     function updateConfig() {
         AJS.$.ajax({
-            url: baseUrl + "/rest/irc-bot/1.0/channelConfig/" + projectId,
+            url: baseUrl + "/rest/jira-irc-bot/1.0/channelConfig/" + projectId,
             type: "PUT",
             contentType: "application/json",
             data: '{ "enable": "' + AJS.$("#enable").attr("checked") + '", "channelName": "' +  AJS.$("#channelName").attr("value") + '" }',
