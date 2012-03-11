@@ -1,0 +1,25 @@
+<html>
+  <head>
+    <title>$i18n.getText("ircbot.project.label")</title>
+    <meta name="decorator" content="atl.admin" />
+    <meta name="application-base-url" content="$applicationProperties.getBaseUrl()">
+    $webResourceManager.requireResource("com.github.j5ik2o.irc-bot:project-resources")
+  </head>
+  <body>
+  	<h1>$i18n.getText("ircbot.project.label")</h1>
+    <form id="project" class="aui">
+    <input type="hidden" id="projectId" name="projectId" value="$projectId"/>
+      <div>
+        <label for="enable">$i18n.getText("ircbot.project.enable.label")</label>
+        <input type="checkbox" id="enable" name="enable">
+      </div>
+      <div>
+        <label for="channelName">$i18n.getText("ircbot.project.channelName.label")</label>
+        <input type="text" id="channelName" name="channelName" class="text">
+      </div>
+      <div>
+        <input id="submit" type="submit" value="$i18n.getText("ircbot.project.save.label")" class="button">
+      </div>
+    </form>
+  </body>
+</html>
