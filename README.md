@@ -1,4 +1,6 @@
-You have successfully created a plugin using the JIRA plugin archetype!
+# JIRA IRC Bot Plugin
+
+
 
 Here are the SDK commands you'll use immediately:
 
