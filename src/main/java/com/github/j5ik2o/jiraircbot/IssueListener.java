@@ -1,4 +1,4 @@
-package com.github.j5ik2o;
+package com.github.j5ik2o.jiraircbot;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -44,6 +44,7 @@ public class IssueListener implements InitializingBean, DisposableBean {
 
 	private final PircBot pircBot = new PircBot() {
 		{
+			// setName("jira-irc-bot-" + UUID.randomUUID().toString());
 			setName("jira-irc-bot");
 		}
 	};
@@ -51,6 +52,8 @@ public class IssueListener implements InitializingBean, DisposableBean {
 	private final VelocityRequestContextFactory velocityRequestContextFactory;
 
 	private final ProjectManager projectManager;
+
+	private PluginSettings settings;
 
 	/**
 	 * Constructor.
@@ -93,9 +96,9 @@ public class IssueListener implements InitializingBean, DisposableBean {
 		eventPublisher.unregister(this);
 	}
 
-	private void onIssueAssignedEvent(PluginSettings settings,
-			String channelName, IssueEvent issueEvent) {
+	private void onIssueAssignedEvent(String channelName, IssueEvent issueEvent) {
 		Issue issue = issueEvent.getIssue();
+		String projectId = issue.getProjectObject().getId().toString();
 		String issueTypeName = issue.getIssueTypeObject().getNameTranslation();
 		String issueKey = issue.getKey();
 		String issueSummary = issue.getSummary();
@@ -109,13 +112,13 @@ public class IssueListener implements InitializingBean, DisposableBean {
 				+ " を割当てました。", issueKey, userDisplayName, userName,
 				assigneeUserDisplayName, assigneeUserName, issueTypeName,
 				issueSummary);
-		pircBot.sendMessage(channelName, messasge);
+		sendMessage(projectId, channelName, messasge);
 		sendIssueUrl(channelName, issue);
 	}
 
-	private void onIssueResolvedEvent(PluginSettings settings,
-			String channelName, IssueEvent issueEvent) {
+	private void onIssueResolvedEvent(String channelName, IssueEvent issueEvent) {
 		Issue issue = issueEvent.getIssue();
+		String projectId = issue.getProjectObject().getId().toString();
 		String issueTypeName = issue.getIssueTypeObject().getNameTranslation();
 		String issueKey = issue.getKey();
 		String issueSummary = issue.getSummary();
@@ -127,25 +130,28 @@ public class IssueListener implements InitializingBean, DisposableBean {
 				+ " を解決しました。", issueKey, userDisplayName, userName,
 				issueTypeName, issueSummary);
 		pircBot.sendMessage(channelName, messasge);
-		sendTimeSpent(channelName, issue.getTimeSpent());
-		sendIssueEventComment(channelName, issueEvent);
+		sendTimeSpent(projectId, channelName, issue.getTimeSpent());
+		sendIssueEventComment(settings, projectId, channelName, issueEvent);
 		sendIssueUrl(channelName, issue);
 	}
 
 	private void sendIssueUrl(String channelName, Issue issue) {
+		String projectId = issue.getProjectObject().getId().toString();
 		String url = getIssueUrl(issue);
-		pircBot.sendMessage(channelName, url);
+		sendMessage(projectId, channelName, url);
 	}
 
-	private void sendIssueUrl(String channelName, Issue issue, String option) {
+	private void sendIssueUrl(PluginSettings settings, String channelName,
+			Issue issue, String option) {
+		String projectId = issue.getProjectObject().getId().toString();
 		String url = getIssueUrl(issue);
-		pircBot.sendMessage(channelName, url.concat(option));
+		sendMessage(projectId, channelName, url.concat(option));
 	}
 
-	private void onIssueCreateEvent(PluginSettings settings,
-			String channelName, IssueEvent issueEvent) {
+	private void onIssueCreateEvent(String channelName, IssueEvent issueEvent) {
 		LOGGER.debug(String.format("channelName = %s", channelName));
 		Issue issue = issueEvent.getIssue();
+		String projectId = issue.getProjectObject().getId().toString();
 		String issueTypeName = issue.getIssueTypeObject().getNameTranslation();
 		String issueKey = issue.getKey();
 		String issueSummary = issue.getSummary();
@@ -163,23 +169,26 @@ public class IssueListener implements InitializingBean, DisposableBean {
 			messasge = messasge.concat(String.format("担当者は%s(%s)です。",
 					assigneeUserDisplayName, assigneeUserName));
 		}
-		pircBot.sendMessage(channelName, messasge);
-		sendIssueEventComment(channelName, issueEvent);
+		sendMessage(projectId, channelName, messasge);
+		sendIssueEventComment(settings, projectId, channelName, issueEvent);
 		sendIssueUrl(channelName, issue);
 	}
 
-	private void sendIssueEventComment(String channelName, IssueEvent issueEvent) {
+	private void sendIssueEventComment(PluginSettings settings,
+			String projectId, String channelName, IssueEvent issueEvent) {
 		if (issueEvent.getComment() != null
 				&& StringUtils.isNotBlank(issueEvent.getComment().getBody())) {
 			String comment = StringUtils.abbreviate(issueEvent.getComment()
-					.getBody(), 20);
-			pircBot.sendMessage(channelName, String.format("\"%s\"", comment));
+					.getBody(), 60);
+			sendMessage(projectId, channelName,
+					String.format("\"%s\"", comment));
 		}
 	}
 
-	private void onIssueWorkLoggedEvent(PluginSettings settings,
-			String channelName, IssueEvent issueEvent) {
+	private void onIssueWorkLoggedEvent(String channelName,
+			IssueEvent issueEvent) {
 		Issue issue = issueEvent.getIssue();
+		String projectId = issue.getProjectObject().getId().toString();
 		String issueTypeName = issue.getIssueTypeObject().getNameTranslation();
 		String issueKey = issue.getKey();
 		String issueSummary = issue.getSummary();
@@ -192,12 +201,13 @@ public class IssueListener implements InitializingBean, DisposableBean {
 				issueTypeName, issueSummary);
 		pircBot.sendMessage(channelName, messasge);
 		Long timeSpent = worklog.getTimeSpent();
-		sendTimeSpent(channelName, timeSpent);
+		sendTimeSpent(projectId, channelName, timeSpent);
 		if (StringUtils.isNotBlank(worklog.getComment())) {
 			String comment = StringUtils.abbreviate(worklog.getComment(), 20);
 			pircBot.sendMessage(channelName, String.format("\"%s\"", comment));
 		}
 		sendIssueUrl(
+				settings,
 				channelName,
 				issue,
 				String.format(
@@ -205,18 +215,30 @@ public class IssueListener implements InitializingBean, DisposableBean {
 						worklog.getId().toString(), worklog.getId().toString()));
 	}
 
-	private void sendTimeSpent(String channelName, Long timeSpent) {
+	private void sendTimeSpent(String projectId, String channelName,
+			Long timeSpent) {
 		if (timeSpent != null) {
-			pircBot.sendMessage(
+			sendMessage(
+
+					projectId,
 					channelName,
 					String.format("作業時間 : "
 							+ DateUtils.getDurationString(timeSpent, 8, 5)));
 		}
 	}
 
-	private void onIssueCommentedEvent(PluginSettings settings,
-			String channelName, IssueEvent issueEvent) {
+	private void sendMessage(String projectId, String channelName,
+			String message) {
+		if (isIrcBotChannelNotice(settings, projectId)) {
+			pircBot.sendNotice(channelName, message);
+		} else {
+			pircBot.sendMessage(channelName, message);
+		}
+	}
+
+	private void onIssueCommentedEvent(String channelName, IssueEvent issueEvent) {
 		Issue issue = issueEvent.getIssue();
+		String projectId = issue.getProjectObject().getId().toString();
 		String issueTypeName = issue.getIssueTypeObject().getNameTranslation();
 		String issueKey = issue.getKey();
 		String issueSummary = issue.getSummary();
@@ -229,9 +251,11 @@ public class IssueListener implements InitializingBean, DisposableBean {
 				+ " %s(%s) が " + Colors.BOLD + "%s:%s" + Colors.NORMAL
 				+ " にコメントしました。", issueKey, authUserDisplayName, authUserName,
 				issueTypeName, issueSummary);
-		pircBot.sendMessage(channelName, messasge);
-		pircBot.sendMessage(channelName, String.format("\"%s\"", commentBody));
+		sendMessage(projectId, channelName, messasge);
+		sendMessage(projectId, channelName,
+				String.format("\"%s\"", commentBody));
 		sendIssueUrl(
+				settings,
 				channelName,
 				issue,
 				String.format(
@@ -255,9 +279,9 @@ public class IssueListener implements InitializingBean, DisposableBean {
 	 */
 	@EventListener
 	public synchronized void onIssueEvent(IssueEvent issueEvent) {
+		settings = pluginSettingsFactory.createGlobalSettings();
 		Project project = issueEvent.getIssue().getProjectObject();
 		String projectId = project.getId().toString();
-		PluginSettings settings = pluginSettingsFactory.createGlobalSettings();
 
 		if (isIrcBotEnable(settings) == false
 				|| isIrcBotChannelEnable(settings, projectId) == false) {
@@ -278,23 +302,23 @@ public class IssueListener implements InitializingBean, DisposableBean {
 
 			Long eventTypeId = issueEvent.getEventTypeId();
 			if (eventTypeId.equals(EventType.ISSUE_CREATED_ID)) {
-				onIssueCreateEvent(settings, channelName, issueEvent);
+				onIssueCreateEvent(channelName, issueEvent);
 			} else if (eventTypeId.equals(EventType.ISSUE_RESOLVED_ID)) {
-				onIssueResolvedEvent(settings, channelName, issueEvent);
+				onIssueResolvedEvent(channelName, issueEvent);
 			} else if (eventTypeId.equals(EventType.ISSUE_ASSIGNED_ID)) {
-				onIssueAssignedEvent(settings, channelName, issueEvent);
+				onIssueAssignedEvent(channelName, issueEvent);
 			} else if (eventTypeId.equals(EventType.ISSUE_WORKLOGGED_ID)) {
-				onIssueWorkLoggedEvent(settings, channelName, issueEvent);
+				onIssueWorkLoggedEvent(channelName, issueEvent);
 			} else if (eventTypeId.equals(EventType.ISSUE_WORKSTARTED_ID)) {
-				onIssueWorkStartedEvent(settings, channelName, issueEvent);
+				onIssueWorkStartedEvent(channelName, issueEvent);
 			} else if (eventTypeId.equals(EventType.ISSUE_WORKSTOPPED_ID)) {
-				onIssueWorkStopedEvent(settings, channelName, issueEvent);
+				onIssueWorkStopedEvent(channelName, issueEvent);
 			} else if (eventTypeId.equals(EventType.ISSUE_COMMENTED_ID)) {
-				onIssueCommentedEvent(settings, channelName, issueEvent);
+				onIssueCommentedEvent(channelName, issueEvent);
 			} else if (eventTypeId.equals(EventType.ISSUE_REOPENED_ID)) {
-				onIssueReOpenedEvent(settings, channelName, issueEvent);
+				onIssueReOpenedEvent(channelName, issueEvent);
 			} else if (eventTypeId.equals(EventType.ISSUE_CLOSED_ID)) {
-				onIssueClosedEvent(settings, channelName, issueEvent);
+				onIssueClosedEvent(channelName, issueEvent);
 			}
 		} catch (NickAlreadyInUseException e) {
 			LOGGER.error("例外が発生しました。", e);
@@ -305,9 +329,9 @@ public class IssueListener implements InitializingBean, DisposableBean {
 		}
 	}
 
-	private void onIssueClosedEvent(PluginSettings settings,
-			String channelName, IssueEvent issueEvent) {
+	private void onIssueClosedEvent(String channelName, IssueEvent issueEvent) {
 		Issue issue = issueEvent.getIssue();
+		String projectId = issue.getProjectObject().getId().toString();
 		String issueTypeName = issue.getIssueTypeObject().getNameTranslation();
 		String issueKey = issue.getKey();
 		String issueSummary = issue.getSummary();
@@ -317,13 +341,13 @@ public class IssueListener implements InitializingBean, DisposableBean {
 				+ " %s(%s) が " + Colors.BOLD + "%s:%s" + Colors.NORMAL
 				+ " をクローズしました。", issueKey, userDisplayName, userName,
 				issueTypeName, issueSummary);
-		pircBot.sendMessage(channelName, messasge);
+		sendMessage(projectId, channelName, messasge);
 		sendIssueUrl(channelName, issue);
 	}
 
-	private void onIssueReOpenedEvent(PluginSettings settings,
-			String channelName, IssueEvent issueEvent) {
+	private void onIssueReOpenedEvent(String channelName, IssueEvent issueEvent) {
 		Issue issue = issueEvent.getIssue();
+		String projectId = issue.getProjectObject().getId().toString();
 		String issueTypeName = issue.getIssueTypeObject().getNameTranslation();
 		String issueKey = issue.getKey();
 		String issueSummary = issue.getSummary();
@@ -333,13 +357,14 @@ public class IssueListener implements InitializingBean, DisposableBean {
 				+ " %s(%s) が " + Colors.BOLD + "%s:%s" + Colors.NORMAL
 				+ " を再オープンしました。", issueKey, userDisplayName, userName,
 				issueTypeName, issueSummary);
-		pircBot.sendMessage(channelName, messasge);
+		sendMessage(projectId, channelName, messasge);
 		sendIssueUrl(channelName, issue);
 	}
 
-	private void onIssueWorkStartedEvent(PluginSettings settings,
-			String channelName, IssueEvent issueEvent) {
+	private void onIssueWorkStartedEvent(String channelName,
+			IssueEvent issueEvent) {
 		Issue issue = issueEvent.getIssue();
+		String projectId = issue.getProjectObject().getId().toString();
 		String issueTypeName = issue.getIssueTypeObject().getNameTranslation();
 		String issueKey = issue.getKey();
 		String issueSummary = issue.getSummary();
@@ -349,14 +374,14 @@ public class IssueListener implements InitializingBean, DisposableBean {
 				+ " %s(%s) が " + Colors.BOLD + "%s:%s" + Colors.NORMAL
 				+ " を開始しました。", issueKey, userDisplayName, userName,
 				issueTypeName, issueSummary);
-		pircBot.sendMessage(channelName, messasge);
+		sendMessage(projectId, channelName, messasge);
 		sendIssueUrl(channelName, issue);
 	}
 
-	private void onIssueWorkStopedEvent(PluginSettings settings,
-			String channelName, IssueEvent issueEvent) {
+	private void onIssueWorkStopedEvent(String channelName,
+			IssueEvent issueEvent) {
 		Issue issue = issueEvent.getIssue();
-		String url = getIssueUrl(issue);
+		String projectId = issue.getProjectObject().getId().toString();
 		String issueTypeName = issue.getIssueTypeObject().getNameTranslation();
 		String issueKey = issue.getKey();
 		String issueSummary = issue.getSummary();
@@ -366,8 +391,8 @@ public class IssueListener implements InitializingBean, DisposableBean {
 				+ " %s(%s) が " + Colors.BOLD + "%s:%s" + Colors.NORMAL
 				+ " を中止しました。", issueKey, userDisplayName, userName,
 				issueTypeName, issueSummary);
-		pircBot.sendMessage(channelName, messasge);
-		pircBot.sendMessage(channelName, url);
+		sendMessage(projectId, channelName, messasge);
+		sendIssueUrl(channelName, issue);
 	}
 
 	private String getChannelName(PluginSettings settings, String projectId) {
@@ -380,6 +405,13 @@ public class IssueListener implements InitializingBean, DisposableBean {
 		return Boolean.parseBoolean((String) settings
 				.get(IrcBotChannelConfig.class.getName() + "_" + projectId
 						+ ".enable"));
+	}
+
+	private boolean isIrcBotChannelNotice(PluginSettings settings,
+			String projectId) {
+		return Boolean.parseBoolean((String) settings
+				.get(IrcBotChannelConfig.class.getName() + "_" + projectId
+						+ ".notice"));
 	}
 
 	private boolean isIrcBotEnable(PluginSettings settings) {
@@ -407,7 +439,6 @@ public class IssueListener implements InitializingBean, DisposableBean {
 		if (pircBot.isConnected()) {
 			return;
 		}
-		PluginSettings settings = pluginSettingsFactory.createGlobalSettings();
 
 		String ircServerName = getIrcServerName(settings);
 		LOGGER.debug("irc server name = " + ircServerName);

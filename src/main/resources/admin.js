@@ -26,11 +26,30 @@ AJS.toInit(function() {
             processData: false
         });
     }
-	    
+
+    function submitCheck(){
+        var check = AJS.$("#enable").attr('checked') && AJS.$("#ircServerName").val != "" && AJS.$("#ircServerPort").val != "";
+        //alert(check);
+        if (check){
+            AJS.$("#submit").removeAttr("disabled");
+        }else{
+            AJS.$("#submit").attr("disabled", "disabled");
+        }
+    }
+
     populateForm();
+    submitCheck();
+    pageModified = false;
     
     AJS.$("#admin").submit(function(e) {
         e.preventDefault();
         updateConfig();
     });
+    AJS.$("#ircServerName").blur(function(){
+        submitCheck();
+    });
+    AJS.$("#ircServerPort").blur(function(){
+        submitCheck();
+    });
+
 });

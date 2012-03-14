@@ -27,7 +27,7 @@
 	</component-import>
 
 	<component key="eventListener"
-		class="com.github.j5ik2o.IssueListener">
+		class="com.github.j5ik2o.jiraircbot.IssueListener">
 		<description>Class that processes the incoming JIRA issue events.
 		</description>
 	</component>
@@ -37,11 +37,11 @@
 		<description>Provides REST resources for the admin UI.</description>
 	</rest>
 
-	<servlet key="admin-servlet" class="com.github.j5ik2o.AdminServlet">
+	<servlet key="admin-servlet" class="com.github.j5ik2o.jiraircbot.AdminServlet">
 		<url-pattern>/jira-irc-bot/admin</url-pattern>
 	</servlet>
 
-	<servlet key="project-servlet" class="com.github.j5ik2o.ProjectServlet">
+	<servlet key="project-servlet" class="com.github.j5ik2o.jiraircbot.ProjectServlet">
 		<url-pattern>/jira-irc-bot/project</url-pattern>
 	</servlet>
 
@@ -49,17 +49,17 @@
 		country="JP">
 	</language>
 
-	<resource type="i18n" name="i18n" location="com.github.j5ik2o.i18n" />
+	<resource type="i18n" name="i18n" location="com.github.j5ik2o.jiraircbot.i18n" />
 
 	<web-item key="jira-menu-item" name="IRCBot Admin"
 		section="system.admin/globalsettings" weight="10" application="jira">
 		<description>Link to ircbot-admin page.</description>
-		<label key="ircbot.admin.label" />
+		<label key="jiraircbot.admin.label" />
 		<link linkId="ircbot-admin-link">/plugins/servlet/jira-irc-bot/admin</link>
 	</web-item>
 
 	<web-panel key="myPanel" location="webpanels.admin.summary.right-panels">
-		<label key="ircbot.project.label" />
+		<label key="jiraircbot.project.label" />
 		<resource name="view" type="velocity" location="web-panel.vm" />
 	</web-panel>
 

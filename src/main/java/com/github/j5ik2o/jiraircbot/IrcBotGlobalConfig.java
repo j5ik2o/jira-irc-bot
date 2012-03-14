@@ -1,4 +1,4 @@
-package com.github.j5ik2o;
+package com.github.j5ik2o.jiraircbot;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;

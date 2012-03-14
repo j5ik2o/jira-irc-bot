@@ -7,7 +7,7 @@
 
 	<groupId>com.github.j5ik2o</groupId>
 	<artifactId>jira-irc-bot</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.2</version>
 	<packaging>atlassian-plugin</packaging>
 
 	<name>JIRA IRC Bot Plugin</name>

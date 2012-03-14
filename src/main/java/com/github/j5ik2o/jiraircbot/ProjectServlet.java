@@ -1,4 +1,4 @@
-package com.github.j5ik2o;
+package com.github.j5ik2o.jiraircbot;
 
 import java.io.IOException;
 import java.net.URI;
