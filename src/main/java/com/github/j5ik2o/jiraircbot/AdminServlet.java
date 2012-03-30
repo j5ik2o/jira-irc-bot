@@ -36,7 +36,6 @@ public class AdminServlet extends HttpServlet {
 	public void doGet(HttpServletRequest request,
 			HttpServletResponse response) throws IOException,
 			ServletException {
-        System.out.println("aaa");
 		LOGGER.debug(String.format("doGet : start(%s, %s)", request, response));
 		String username = userManager.getRemoteUsername(request);
 		if (username != null
