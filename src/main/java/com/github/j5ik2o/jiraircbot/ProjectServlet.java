@@ -22,70 +22,64 @@ import com.atlassian.templaterenderer.TemplateRenderer;
 
 @SuppressWarnings("serial")
 public class ProjectServlet extends HttpServlet {
-	private static final Logger LOGGER = LoggerFactory
-			.getLogger(ProjectServlet.class);
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(ProjectServlet.class);
 
-	private final UserManager userManager;
-	private final TemplateRenderer renderer;
-	private final LoginUriProvider loginUriProvider;
-	private final ApplicationProperties applicationProperties;
-	
-	private final JiraAuthenticationContext authenticationContext;
+  private final UserManager userManager;
+  private final TemplateRenderer renderer;
+  private final LoginUriProvider loginUriProvider;
+  private final ApplicationProperties applicationProperties;
 
-	public ProjectServlet(UserManager userManager,
-			LoginUriProvider loginUriProvider,
-			TemplateRenderer renderer,
-			JiraAuthenticationContext authenticationContext,
-			ApplicationProperties applicationProperties) {
-		this.userManager = userManager;
-		this.loginUriProvider = loginUriProvider;
-		this.renderer = renderer;
-		this.authenticationContext = authenticationContext;
-		this.applicationProperties = applicationProperties;
-	}
+  private final JiraAuthenticationContext authenticationContext;
 
-	@Override
-	public void doGet(HttpServletRequest request,
-			HttpServletResponse response) throws IOException,
-			ServletException {
-		LOGGER.debug(String.format("doGet : start(%s, %s)", request, response));
-		String username = userManager.getRemoteUsername(request);
-		if (username != null
-				&& !userManager.isSystemAdmin(username)) {
-			redirectToLogin(request, response);
-			LOGGER.debug("doGet : finshed");
-			return;
-		}
-		String projectId = request.getParameter("projectId");
+  public ProjectServlet(UserManager userManager,
+      LoginUriProvider loginUriProvider,
+      TemplateRenderer renderer,
+      JiraAuthenticationContext authenticationContext,
+      ApplicationProperties applicationProperties) {
+    this.userManager = userManager;
+    this.loginUriProvider = loginUriProvider;
+    this.renderer = renderer;
+    this.authenticationContext = authenticationContext;
+    this.applicationProperties = applicationProperties;
+  }
 
-		Map<String, Object> initContext = MapBuilder
-				.<String, Object> newBuilder()
-				.add("projectId", projectId).add("applicationProperties", applicationProperties)
-				.toMap();
-		Map<String, Object> root = JiraVelocityUtils
-				.getDefaultVelocityParams(initContext,
-						authenticationContext);
-		response.setContentType("text/html;charset=utf-8");
-		renderer.render("project.vm", root, response.getWriter());
-		LOGGER.debug("doGet : finshed");
-	}
+  @Override
+  public void doGet(HttpServletRequest request,
+      HttpServletResponse response) throws IOException,
+      ServletException {
+    LOGGER.debug(String.format("doGet : start(%s, %s)", request, response));
+    String username = userManager.getRemoteUsername(request);
+    String projectId = request.getParameter("projectId");
 
-	private void redirectToLogin(HttpServletRequest request,
-			HttpServletResponse response) throws IOException {
-		LOGGER.debug(String.format("redirectToLogin : start(%s, %s)", request, response));
-		response.sendRedirect(loginUriProvider.getLoginUri(
-				getUri(request)).toASCIIString());
-		LOGGER.debug("redirectToLogin : finshed");
-	}
+    Map<String, Object> initContext = MapBuilder
+        .<String, Object> newBuilder()
+        .add("projectId", projectId).add("applicationProperties", applicationProperties)
+        .toMap();
+    Map<String, Object> root = JiraVelocityUtils
+        .getDefaultVelocityParams(initContext,
+            authenticationContext);
+    response.setContentType("text/html;charset=utf-8");
+    renderer.render("project.vm", root, response.getWriter());
+    LOGGER.debug("doGet : finshed");
+  }
 
-	private URI getUri(HttpServletRequest request) {
-		LOGGER.debug("getUri : start");
-		StringBuffer builder = request.getRequestURL();
-		if (request.getQueryString() != null) {
-			builder.append("?");
-			builder.append(request.getQueryString());
-		}
-		LOGGER.debug("getUri : finshed");
-		return URI.create(builder.toString());
-	}
+  private void redirectToLogin(HttpServletRequest request,
+      HttpServletResponse response) throws IOException {
+    LOGGER.debug(String.format("redirectToLogin : start(%s, %s)", request, response));
+    response.sendRedirect(loginUriProvider.getLoginUri(
+        getUri(request)).toASCIIString());
+    LOGGER.debug("redirectToLogin : finshed");
+  }
+
+  private URI getUri(HttpServletRequest request) {
+    LOGGER.debug("getUri : start");
+    StringBuffer builder = request.getRequestURL();
+    if (request.getQueryString() != null) {
+      builder.append("?");
+      builder.append(request.getQueryString());
+    }
+    LOGGER.debug("getUri : finshed");
+    return URI.create(builder.toString());
+  }
 }

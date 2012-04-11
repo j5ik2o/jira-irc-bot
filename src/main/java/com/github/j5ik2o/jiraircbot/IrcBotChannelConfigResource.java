@@ -23,49 +23,43 @@ import com.atlassian.sal.api.user.UserManager;
 
 @Path("/channelConfig")
 public class IrcBotChannelConfigResource {
-	private final UserManager userManager;
-	private final PluginSettingsFactory pluginSettingsFactory;
-	private final TransactionTemplate transactionTemplate;
-	private static final Logger LOGGER = LoggerFactory
-			.getLogger(ProjectServlet.class);
+  private final UserManager userManager;
+  private final PluginSettingsFactory pluginSettingsFactory;
+  private final TransactionTemplate transactionTemplate;
+  private static final Logger LOGGER = LoggerFactory
+      .getLogger(ProjectServlet.class);
 
-	public IrcBotChannelConfigResource(UserManager userManager,
-			PluginSettingsFactory pluginSettingsFactory,
-			TransactionTemplate transactionTemplate) {
-		this.userManager = userManager;
-		this.pluginSettingsFactory = pluginSettingsFactory;
-		this.transactionTemplate = transactionTemplate;
-	}
+  public IrcBotChannelConfigResource(UserManager userManager,
+      PluginSettingsFactory pluginSettingsFactory,
+      TransactionTemplate transactionTemplate) {
+    this.userManager = userManager;
+    this.pluginSettingsFactory = pluginSettingsFactory;
+    this.transactionTemplate = transactionTemplate;
+  }
 
-	@GET
-	@Path("{projectId}")
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response get(
-			@PathParam("projectId") final String projectId,
-			@Context HttpServletRequest request) {
-		LOGGER.debug(String.format("get : start(%s,%s)",projectId,request));
-		String username = userManager.getRemoteUsername(request);
-		if (username != null
-				&& !userManager.isSystemAdmin(username)) {
-			Response response = Response.status(Status.UNAUTHORIZED).build();
-			LOGGER.debug(String.format("get : finished(%s)",response));
-			return response;
-		}
-		Response response = Response.ok(
-				transactionTemplate
-						.execute(new TransactionCallback() {
-							public Object doInTransaction() {
-								PluginSettings settings = pluginSettingsFactory
-										.createGlobalSettings();
-								IrcBotChannelConfig config = new IrcBotChannelConfig();
-								boolean enable = Boolean
-										.parseBoolean((String) settings
-												.get(IrcBotChannelConfig.class
-														.getName()
-														+ "_"
-														+ projectId
-														+ ".enable"));
-								config.setEnable(enable);
+  @GET
+  @Path("{projectId}")
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response get(
+      @PathParam("projectId") final String projectId,
+      @Context HttpServletRequest request) {
+    LOGGER.debug(String.format("get : start(%s,%s)",projectId,request));
+    String username = userManager.getRemoteUsername(request);
+    Response response = Response.ok(
+        transactionTemplate
+            .execute(new TransactionCallback() {
+              public Object doInTransaction() {
+                PluginSettings settings = pluginSettingsFactory
+                    .createGlobalSettings();
+                IrcBotChannelConfig config = new IrcBotChannelConfig();
+                boolean enable = Boolean
+                    .parseBoolean((String) settings
+                        .get(IrcBotChannelConfig.class
+                            .getName()
+                            + "_"
+                            + projectId
+                            + ".enable"));
+                config.setEnable(enable);
 
                                 boolean notice = Boolean
                                         .parseBoolean((String) settings
@@ -76,49 +70,45 @@ public class IrcBotChannelConfigResource {
                                                         + ".notice"));
                                 config.setNotice(notice);
 
-								String channelName = (String) settings
-										.get(IrcBotChannelConfig.class.getName()
-												+ "_" + projectId + ".channelName");
-								if (channelName != null) {
-									config.setChannelName(channelName);
-								}
-								return config;
-							}
-						})).build();
-		LOGGER.debug(String.format("get : finished(%s)",response));
-		return response;
-	}
+                String channelName = (String) settings
+                    .get(IrcBotChannelConfig.class.getName()
+                        + "_" + projectId + ".channelName");
+                if (channelName != null) {
+                  config.setChannelName(channelName);
+                }
+                return config;
+              }
+            })).build();
+    LOGGER.debug(String.format("get : finished(%s)",response));
+    return response;
+  }
 
-	@PUT
-	@Path("{projectId}")
-	@Consumes(MediaType.APPLICATION_JSON)
-	public Response put(
-			@PathParam("projectId") final String projectId,
-			final IrcBotChannelConfig config,
-			@Context HttpServletRequest request) {
-		String username = userManager.getRemoteUsername(request);
-		if (username != null
-				&& !userManager.isSystemAdmin(username)) {
-			return Response.status(Status.UNAUTHORIZED).build();
-		}
-		transactionTemplate.execute(new TransactionCallback() {
-			public Object doInTransaction() {
-				PluginSettings pluginSettings = pluginSettingsFactory
-						.createGlobalSettings();
-				pluginSettings.put(
-						IrcBotChannelConfig.class.getName() + "_"
-								+ projectId + ".enable", config.getEnable().toString());
+  @PUT
+  @Path("{projectId}")
+  @Consumes(MediaType.APPLICATION_JSON)
+  public Response put(
+      @PathParam("projectId") final String projectId,
+      final IrcBotChannelConfig config,
+      @Context HttpServletRequest request) {
+    String username = userManager.getRemoteUsername(request);
+    transactionTemplate.execute(new TransactionCallback() {
+      public Object doInTransaction() {
+        PluginSettings pluginSettings = pluginSettingsFactory
+            .createGlobalSettings();
+        pluginSettings.put(
+            IrcBotChannelConfig.class.getName() + "_"
+                + projectId + ".enable", config.getEnable().toString());
                 pluginSettings.put(
                         IrcBotChannelConfig.class.getName() + "_"
                                 + projectId + ".notice", config.getNotice().toString());
-				pluginSettings.put(
-						IrcBotChannelConfig.class.getName() + "_"
-								+ projectId + ".channelName",
-						config.getChannelName());
-				return null;
-			}
-		});
+        pluginSettings.put(
+            IrcBotChannelConfig.class.getName() + "_"
+                + projectId + ".channelName",
+            config.getChannelName());
+        return null;
+      }
+    });
 
-		return Response.noContent().build();
-	}
+    return Response.noContent().build();
+  }
 }
