@@ -129,7 +129,7 @@ public class IssueListener implements InitializingBean, DisposableBean {
 				+ " %s(%s) が " + Colors.BOLD + "%s:%s" + Colors.NORMAL
 				+ " を解決しました。", issueKey, userDisplayName, userName,
 				issueTypeName, issueSummary);
-		pircBot.sendMessage(channelName, messasge);
+		sendMessage(projectId, channelName, messasge);
 		sendTimeSpent(projectId, channelName, issue.getTimeSpent());
 		sendIssueEventComment(settings, projectId, channelName, issueEvent);
 		sendIssueUrl(channelName, issue);
@@ -199,12 +199,12 @@ public class IssueListener implements InitializingBean, DisposableBean {
 				+ " %s(%s) が " + Colors.BOLD + "%s:%s" + Colors.NORMAL
 				+ " に作業ログを記録しました。", issueKey, authorFullName, author,
 				issueTypeName, issueSummary);
-		pircBot.sendMessage(channelName, messasge);
+		sendMessage(projectId, channelName, messasge);
 		Long timeSpent = worklog.getTimeSpent();
 		sendTimeSpent(projectId, channelName, timeSpent);
 		if (StringUtils.isNotBlank(worklog.getComment())) {
 			String comment = StringUtils.abbreviate(worklog.getComment(), 20);
-			pircBot.sendMessage(channelName, String.format("\"%s\"", comment));
+			sendMessage(projectId, channelName, String.format("\"%s\"", comment));
 		}
 		sendIssueUrl(
 				settings,
