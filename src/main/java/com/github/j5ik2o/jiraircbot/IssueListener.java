@@ -45,8 +45,8 @@ public class IssueListener implements InitializingBean, DisposableBean {
 
 	private final PircBot pircBot = new PircBot() {
 		{
-			setName("jira-irc-bot-" + UUID.randomUUID().toString());
-//			setName("jira-irc-bot");
+//			setName("jira-irc-bot-" + UUID.randomUUID().toString());
+			setName("jira-irc-bot");
 		}
 	};
 
