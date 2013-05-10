@@ -3,6 +3,7 @@ package com.github.j5ik2o.jiraircbot;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 import org.apache.commons.lang.StringUtils;
 import org.jibble.pircbot.Colors;
@@ -44,8 +45,8 @@ public class IssueListener implements InitializingBean, DisposableBean {
 
 	private final PircBot pircBot = new PircBot() {
 		{
-			// setName("jira-irc-bot-" + UUID.randomUUID().toString());
-			setName("jira-irc-bot");
+			setName("jira-irc-bot-" + UUID.randomUUID().toString());
+//			setName("jira-irc-bot");
 		}
 	};
 
@@ -434,6 +435,11 @@ public class IssueListener implements InitializingBean, DisposableBean {
 		return null;
 	}
 
+	private String getIrcEncoding(PluginSettings settings) {
+		return (String) settings.get(IrcBotGlobalConfig.class.getName()
+				+ ".ircEncoding");
+	}
+
 	private void autoConnect() throws NickAlreadyInUseException, IOException,
 			IrcException {
 		if (pircBot.isConnected()) {
@@ -444,6 +450,12 @@ public class IssueListener implements InitializingBean, DisposableBean {
 		LOGGER.debug("irc server name = " + ircServerName);
 		Integer ircServerPort = getIrcServerPort(settings);
 		LOGGER.debug("irc server port = " + ircServerPort);
+		String ircEncoding = getIrcEncoding(settings);
+		if (ircEncoding == null || ircEncoding.length() == 0) {
+			ircEncoding = "UTF-8";
+		}
+		LOGGER.debug("irc encoding = " + ircEncoding);
+		pircBot.setEncoding(ircEncoding);
 		if (ircServerPort != null && ircServerPort.intValue() != 0) {
 			pircBot.connect(ircServerName, ircServerPort.intValue());
 		} else {

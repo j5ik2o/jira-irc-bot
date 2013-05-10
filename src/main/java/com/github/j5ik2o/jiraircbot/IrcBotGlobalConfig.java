@@ -18,6 +18,17 @@ public final class IrcBotGlobalConfig {
 	@XmlElement
 	private int ircServerPort;
 
+	@XmlElement
+	private String ircEncoding;
+	
+	public String getIrcEncoding() {
+		return ircEncoding;
+	}
+
+	public void setIrcEncoding(String ircEncoding) {
+		this.ircEncoding = ircEncoding;
+	}
+
 	public String getIrcServerName() {
 		return ircServerName;
 	}

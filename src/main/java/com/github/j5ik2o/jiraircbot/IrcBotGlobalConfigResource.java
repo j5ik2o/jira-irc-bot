@@ -67,6 +67,10 @@ public class IrcBotGlobalConfigResource {
 						if (ircServerPort != null) {
 							config.setIrcServerPort(Integer
 									.parseInt(ircServerPort));
+							
+							config.setIrcEncoding((String) settings
+									.get(IrcBotGlobalConfig.class.getName()
+											+ ".ircEncoding"));
 						}
 						return config;
 					}
@@ -96,6 +100,8 @@ public class IrcBotGlobalConfigResource {
 				pluginSettings.put(IrcBotGlobalConfig.class.getName()
 						+ ".ircServerPort",
 						Integer.toString(config.getIrcServerPort()));
+				pluginSettings.put(IrcBotGlobalConfig.class.getName()
+						+ ".ircEncoding", config.getIrcEncoding());
 				return null;
 			}
 		});
