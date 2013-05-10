@@ -18,11 +18,12 @@ AJS.toInit(function() {
     }
     
     function updateConfig() {
+    	var enable = AJS.$("#enable").attr("checked") == "checked" ? "true" : "false";
         AJS.$.ajax({
             url: baseUrl + "/rest/jira-irc-bot/1.0/globalConfig",
             type: "PUT",
             contentType: "application/json",
-            data: '{ "enable": "' + AJS.$("#enable").attr("checked") + '", "ircServerName": "' + AJS.$("#ircServerName").attr("value") + '", "ircServerPort": ' +  AJS.$("#ircServerPort").attr("value") + ' }',
+            data: '{ "enable": "' + enable + '", "ircServerName": "' + AJS.$("#ircServerName").attr("value") + '", "ircServerPort": ' +  AJS.$("#ircServerPort").attr("value") + ' }',
             processData: false
         });
     }
