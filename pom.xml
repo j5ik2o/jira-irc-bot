@@ -36,6 +36,7 @@
         <configuration>
           <source>1.6</source>
           <target>1.6</target>
+          <encoding>UTF-8</encoding>
         </configuration>
       </plugin>
     </plugins>
@@ -91,7 +92,7 @@
   </dependencies>
 
   <properties>
-    <jira.version>4.4.1</jira.version>
+    <jira.version>5.2</jira.version>
     <jira.data.version>4.4</jira.data.version>
     <amps.version>3.8</amps.version>
   </properties>

@@ -41,12 +41,14 @@ AJS.toInit(function() {
     }
     
     function updateConfig() {
+    	var enable = AJS.$("#enable").attr("checked") == "checked" ? "true" : "false";
+    	var notice = AJS.$("#notice").attr("checked") == "checked" ? "true" : "false"; 
         AJS.$.ajax({
             url: baseUrl + "/rest/jira-irc-bot/1.0/channelConfig/" + projectId,
             type: "PUT",
             contentType: "application/json",
-            data: '{ "enable": "' + AJS.$("#enable").attr("checked") +
-                '", "notice": "' + AJS.$("#notice").attr("checked") +
+            data: '{ "enable": "' + enable +
+                '", "notice": "' + notice +
                 '", "channelName": "' +  AJS.$("#channelName").attr("value") + '" }',
             processData: false
         });
